@@ -1,90 +1,153 @@
-⚡ TriageFlow: The Executive AI Productivity System
+TriageFlow: The Executive AI Productivity System 📧 🤖
+Course: COT6930 Generative Intelligence and Software Development Lifecycles (Fall 2025)
 
-Multi-Agent Generative Intelligence for Automated Email Triage
+Instructor: Dr. Fernando Koch
 
-TriageFlow is an autonomous "Chief of Staff" agent designed to solve the executive inbox bottleneck. It uses a Multi-Agent System (MAS) to filter noise, research context, and draft replies, reclaiming 3+ hours of productivity daily.
+Team: Inbox Nexus
 
-🚀 Project Overview
+Developer: Hemanth Kumar Sabbavarapu
 
-This repository contains the MVP v0.1 prototype for the TriageFlow system. It demonstrates a Sequential Multi-Agent Architecture orchestrated by Microsoft Semantic Kernel.
+📋 Executive Summary
+TriageFlow is a Multi-Agent Generative Intelligence System designed to solve the critical "Inbox Bottleneck" faced by modern executives.
 
-🤖 The Agents
+Executives lose 3–4 hours daily to manual email administration. TriageFlow acts as an Intelligent Outlook Integration, utilizing a 5-Agent Architecture to autonomously filter noise, research historical context (RAG), and draft style-matched replies. Unlike standard AI tools, TriageFlow features Temporal Intelligence, ensuring it can distinguish between "Active" (2025) and "Stale" (2020) corporate policies to prevent hallucinations.
 
-The system is composed of three specialized AI agents working in sequence:
+⚡ Key Features
+1. 🧠 Multi-Agent Architecture (Microsoft Semantic Kernel)
+Instead of a single prompt, we use specialized agents:
 
-🛡️ Classification Agent (The Gatekeeper):
+Gatekeeper Agent: Classifies email into Spam, FYI, Low, or High Urgency.
 
-Role: Analyzes email intent and urgency (High/Medium/Low).
+Temporal Research Agent: Performs RAG (Retrieval-Augmented Generation) but filters data by recency (e.g., ignoring 2020 travel policies in favor of 2025 rules).
 
-Logic: Filters out "Spam" and "FYI" emails automatically. Only "Actionable" items proceed.
+Drafter Agent: Generates responses mimicking the executive's specific tone.
 
-📚 Context Research Agent (The Librarian):
+Delegation Agent: Automatically extracts tasks (Who, What, Due Date) for Jira/Asana.
 
-Role: Performs Retrieval-Augmented Generation (RAG).
+Refiner Agent: A feedback loop agent that rewrites drafts based on user instructions (e.g., "Make it sterner").
 
-Logic: Queries a mock corporate knowledge base to find relevant facts, policies, and history associated with the incoming email.
+2. 📅 Temporal Intelligence Engine
+The system includes a "Time Lock" mechanism. It detects conflicting data in the knowledge base and prioritizes the most recent "Active" policy, flagging the decision with a UI badge (📅 2025 DATA LOCK) to ensure compliance safety.
 
-✍️ Response Drafter Agent (The Ghostwriter):
+3. 🛡️ Human-in-the-Loop & Safety
+Approval Gate: The AI never sends emails autonomously. It presents a proposed draft for review.
 
-Role: Generates professional replies.
+Stateful Refinement: Users can iteratively refine drafts using natural language, with the system versioning every change.
 
-Logic: Uses Few-Shot Prompting to emulate the executive's specific tone and brevity, using the context provided by the Research Agent.
+🏗️ System Architecture
+Code snippet
 
-🛠️ Architecture
+graph TD
+    %% Nodes
+    Email[📩 Incoming Email]
+    
+    subgraph "TriageFlow Brain (Semantic Kernel)"
+        Class[🤖 Agent 1: Classifier]
+        RAG[📚 Agent 2: Temporal Research]
+        Draft[✍️ Agent 3: Drafter]
+        Del[👉 Agent 4: Delegator]
+        Refine[🧠 Agent 5: Refiner]
+    end
+    
+    subgraph "Knowledge Base"
+        DB[(Corp Policies)]
+    end
 
-The system follows a Human-in-the-Loop design pattern for safety.
+    subgraph "User Interface (Streamlit)"
+        SpamUI[🗑️ Spam/Block UI]
+        LowUI[💤 Ack/Snooze UI]
+        ReviewUI{👤 Human Approval Gate}
+        Action[✅ Send Email / Create Ticket]
+    end
 
-graph LR
-    A[Email Input] --> B[Agent 1: Classification]
-    B --> C{Is Urgent?}
-    C -- No --> D[Auto-Archive]
-    C -- Yes --> E[Agent 2: Context Research]
-    E --> F[Agent 3: Response Drafter]
-    F --> G[🛑 Human Approval Gate]
-    G --> H[Send / Edit / Reject]
+    %% Flow
+    Email --> Class
+    Class -- "Spam" --> SpamUI
+    Class -- "FYI / Low" --> LowUI
+    Class -- "High / Action" --> RAG
+    
+    RAG -- "Query (Active vs Stale)" --> DB
+    DB -- "Active Context (2025)" --> RAG
+    
+    RAG --> Draft
+    RAG --> Del
+    
+    Draft --> ReviewUI
+    Del --> ReviewUI
+    
+    ReviewUI -- "Refine Request" --> Refine
+    Refine -- "New Version" --> ReviewUI
+    
+    ReviewUI -- "Approve" --> Action
+    
+    %% Styling
+    style Class fill:#0078D4,color:white
+    style RAG fill:#0078D4,color:white
+    style Draft fill:#0078D4,color:white
+    style Del fill:#0078D4,color:white
+    style Refine fill:#ff9800,color:white
+    style ReviewUI fill:#4caf50,color:white
+🚀 Installation & Setup
+1. Clone the Repository
+Bash
 
-
-💻 Installation & Setup
-
-1. Prerequisites
-
-Python 3.8 or higher
-
-An Azure OpenAI Endpoint & Key (or OpenAI API Key)
-
-2. Clone the Repository
-
-git clone [https://github.com/YOUR_USERNAME/TriageFlow_MVP.git](https://github.com/YOUR_USERNAME/TriageFlow_MVP.git)
+git clone https://github.com/Hemanth15220/TriageFlow_MVP.git
 cd TriageFlow_MVP
+2. Install Dependencies
+This project requires Python 3.9+ and the Microsoft Semantic Kernel SDK.
 
+Bash
 
-3. Install Dependencies
+pip install streamlit semantic-kernel openai python-dotenv nest_asyncio
+3. Configure Environment Variables
+Create a file named .env in the root directory and add your Azure OpenAI credentials:
 
-It is recommended to use a virtual environment.
+Code snippet
 
-# Create virtual env (Mac/Linux)
-python3 -m venv venv
-source venv/bin/activate
+AZURE_OPENAI_ENDPOINT="https://YOUR_RESOURCE_NAME.openai.azure.com/"
+AZURE_OPENAI_KEY="YOUR_API_KEY"
+AZURE_DEPLOYMENT_NAME="gpt-4o"
+4. Run the Application
+Start the Streamlit interface:
 
-# Install packages
-pip install streamlit semantic-kernel openai python-dotenv
-
-
-4. Configure Environment
-
-Create a file named .env in the root folder and add your credentials:
-
-# .env
-AZURE_OPENAI_KEY="your_key_here"
-AZURE_OPENAI_ENDPOINT="your_endpoint_here"
-
-
-(Note: The code is configured for gpt-4o by default. You can change this in app.py if needed.)
-
-🏃‍♂️ How to Run the Demo
-
-This prototype includes a Streamlit Web Dashboard to visualize the agent workflow.
-
-Run the application:
+Bash
 
 streamlit run app.py
+🎮 How to Demo (Walkthrough)
+Scenario 1: Temporal Intelligence (The "Time Lock")
+
+Select the email "Travel Request: NY to LA" (High Priority).
+
+Click 🚀 Analyze Email.
+
+Observe the "📅 2025 DATA LOCK" badge in the sidebar.
+
+Explanation: The AI found two policies (2020 vs 2025) and correctly used the 2025 Business Class rule to approve the request, ignoring the stale data.
+
+Scenario 2: The Refinement Loop
+
+Look at the generated draft.
+
+Click ✏️ Refine and type: "Make it more casual and shorter."
+
+Click Update Draft.
+
+Explanation: The Refiner Agent rewrites the text in real-time, demonstrating the stateful feedback loop.
+
+Scenario 3: Delegation
+
+Select the "Task: Update Board Deck" email.
+
+Click the 👉 Delegate tab.
+
+Explanation: The system automatically extracted the Task ("Update slides"), the Owner ("Me"), and the Deadline ("Friday").
+
+📂 File Structure
+app.py: The main entry point containing the Streamlit UI and Semantic Kernel Agent Logic.
+
+mock_data.py: A procedural generator that creates realistic email scenarios (Spam, Crisis, Approvals) and contains the "Knowledge Base" with conflicting dates.
+
+.env: (Not included in repo) Stores API keys.
+
+⚖️ License
+This project is licensed under the MIT License - see the LICENSE file for details.
